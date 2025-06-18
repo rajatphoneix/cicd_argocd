@@ -4,9 +4,9 @@ pipeline {
         AWS_REGION = "ap-south-1"
         IMAGE_NAME = "springboot-demo"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        ECR_REGISTRY = "123456789012.dkr.ecr.ap-south-1.amazonaws.com"
+        ECR_REGISTRY = "390844763711.dkr.ecr.ap-south-1.amazonaws.com/cicd_demo_repo"
         ECR_REPO = "${ECR_REGISTRY}/${IMAGE_NAME}"
-        GIT_CRED_ID = "github-pat"
+
     }
     tools {
         maven 'Maven_3.8.5'
@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: "${GIT_CRED_ID}", url: 'https://github.com/YOUR_USERNAME/YOUR_REPO.git'
+                git url: 'https://github.com/rajatphoneix/cicd_argocd.git'
             }
         }
         stage('Test') {
@@ -41,8 +41,8 @@ pipeline {
             steps {
                 sh '''
                   sed -i "s|image:.*|image: $ECR_REPO:$IMAGE_TAG|" deployment/base/deployment.yaml
-                  git config user.email "jenkins@example.com"
-                  git config user.name "Jenkins CI"
+                  git config user.email "rajatphoneix@gmail.com"
+                  git config user.name "rajatphoneix"
                   git add deployment/base/deployment.yaml
                   git commit -m "Auto update: $IMAGE_TAG"
                   git push origin main
