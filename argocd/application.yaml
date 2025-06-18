@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YOUR_USERNAME/YOUR_REPO.git
+    repoURL: https://github.com/rajatphoneix/cicd_argocd.git
     targetRevision: HEAD
     path: deployment/base
   destination:
