@@ -2,33 +2,32 @@ FROM jenkins/jenkins:lts
 
 USER root
 
-# Install packages including curl, unzip, git, maven, etc.
+# Install basic packages
 RUN apt-get update && apt-get install -y \
-    curl unzip git software-properties-common maven docker.io
+    curl unzip git software-properties-common maven gnupg2 ca-certificates lsb-release
+
 # Install AWS CLI v2
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
     ./aws/install && \
     rm -rf awscliv2.zip aws
 
- RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-    gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+# Add Docker's official GPG key and repository
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
+    tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y docker-ce docker-ce-cli containerd.io
 
-&& echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
-  https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
-&& sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io
-&& sudo systemctl enable docker
-&& sudo systemctl start docker
-&& sudo usermod -aG docker $USER
-&& newgrp docker
-&& sudo usermod -aG docker $USER
-&& newgrp docker
-&& docker run -d --name jenkins \
-     -p 8080:8080 -p 50000:50000 \
-     -v jenkins_home:/var/jenkins_home \
-     -v /var/run/docker.sock:/var/run/docker.sock \
-     custom-jenkins
+# Install kubectl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -sSL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+    chmod +x kubectl && mv kubectl /usr/local/bin/
+
+# Install ArgoCD CLI
+RUN curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64 && \
+    chmod +x /usr/local/bin/argocd
 
 USER jenkins
