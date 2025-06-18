@@ -17,7 +17,7 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 && echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
   https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
 && sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io
 && sudo systemctl enable docker
 && sudo systemctl start docker
