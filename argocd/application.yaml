@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/rajatphoneix/cicd_argocd.git
-    targetRevision: HEAD
+    targetRevision: main
     path: deployment/base
   destination:
     server: https://kubernetes.default.svc
