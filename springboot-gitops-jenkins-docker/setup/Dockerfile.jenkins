@@ -2,6 +2,35 @@ FROM jenkins/jenkins:lts
 
 USER root
 
-RUN apt-get update &&     apt-get install -y sudo curl unzip git software-properties-common maven docker.io &&     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" &&     unzip awscliv2.zip &&     ./aws/install &&     curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" &&     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+# Install system packages
+RUN apt-get update && apt-get install -y \
+    curl unzip git software-properties-common \
+    maven gnupg2 ca-certificates lsb-release \
+    apt-transport-https make golang-go
+
+# Install AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -rf awscliv2.zip aws
+
+# Add Docker's official GPG key and repository
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/ubuntu focal stable" | \
+    tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y docker-ce docker-ce-cli containerd.io
+
+# Install kubectl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -sSL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+    chmod +x kubectl && mv kubectl /usr/local/bin/
+
+# Install ArgoCD CLI
+RUN curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64 && \
+    chmod +x /usr/local/bin/argocd
+
 
 USER jenkins
