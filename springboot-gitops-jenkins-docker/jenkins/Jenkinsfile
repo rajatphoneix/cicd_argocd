@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/rajatphoneix/cicd_argocd.git'
+                git branch: 'main',url: 'https://github.com/rajatphoneix/cicd_argocd.git'
             }
         }
         stage('Test') {
