@@ -2,9 +2,11 @@ FROM jenkins/jenkins:lts
 
 USER root
 
-# Install basic packages
+# Install system packages
 RUN apt-get update && apt-get install -y \
-    curl unzip git software-properties-common maven gnupg2 ca-certificates lsb-release apt-transport-https make
+    curl unzip git software-properties-common \
+    maven gnupg2 ca-certificates lsb-release \
+    apt-transport-https make golang-go
 
 # Install AWS CLI v2
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
@@ -30,18 +32,14 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -sSL https://dl.k8s.io/release/st
 RUN curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64 && \
     chmod +x /usr/local/bin/argocd
 
-RUN add-apt-repository ppa:longsleep/golang-backports -y && \
-    apt-get update && \
-    apt-get install -y golang-go
-
-# Install Amazon ECR Credential Helper
+# ✅ Install Amazon ECR Credential Helper (with Go installed above)
 RUN git clone https://github.com/awslabs/amazon-ecr-credential-helper.git && \
     cd amazon-ecr-credential-helper && \
     make && \
     cp bin/local/docker-credential-ecr-login /usr/local/bin/ && \
     cd .. && rm -rf amazon-ecr-credential-helper
-    
-# Set Docker to use ECR credential helper
+
+# Configure Docker to use ECR credential helper
 RUN mkdir -p /root/.docker && \
     echo '{ "credsStore": "ecr-login" }' > /root/.docker/config.json
 
